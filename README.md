@@ -24,6 +24,30 @@ Open [`src/config.js`](src/config.js):
 - `telegram`, `instagram` — paste `@username` or full URL; buttons appear when filled
 - `showreelUrl` — YouTube/Vimeo watch or embed URL
 
+## Project type examples
+
+In [`src/config.js`](src/config.js) → `projectTypes`, paste a YouTube link into `videoUrl` for each type:
+
+```js
+{ labelKey: 'useBeauty', videoUrl: 'https://youtu.be/XXXX', image: '' },
+```
+
+Optional custom thumbnail: `image: '/examples/beauty.jpg'`.
+
+## Hero background & screenshots
+
+Drop your images into [`public/hero/`](public/hero/), then list them in [`src/config.js`](src/config.js):
+
+```js
+heroImages: [
+  '/hero/01.jpg',
+  '/hero/02.jpg',
+  { src: '/hero/03.jpg', thumb: '/hero/03-thumb.jpg' }, // optional smaller thumb
+],
+```
+
+While `heroImages` is empty, the hero uses YouTube previews as a fallback.
+
 ## YouTube carousel auto-update
 
 List of videos: [`src/youtube-projects.json`](src/youtube-projects.json).

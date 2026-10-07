@@ -30,6 +30,77 @@ function embedUrl(url) {
   return url
 }
 
+function youtubeIdFromUrl(url) {
+  if (!url) return ''
+  const yt = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/,
+  )
+  return yt?.[1] ?? ''
+}
+
+function youtubeThumb(id, quality = 'hqdefault') {
+  return `https://i.ytimg.com/vi/${id}/${quality}.jpg`
+}
+
+function heroYoutubeIds() {
+  const ids = []
+  const add = (id) => {
+    if (id && !ids.includes(id)) ids.push(id)
+  }
+
+  add(youtubeIdFromUrl(config.showreelUrl))
+  for (const project of config.youtubeProjects || []) {
+    for (const video of project.videos || []) add(video.id)
+  }
+
+  return ids.slice(0, 10)
+}
+
+function heroFrames() {
+  const custom = (config.heroImages || []).filter(Boolean)
+  if (custom.length) {
+    return custom.map((item) => {
+      if (typeof item === 'string') return { src: item, thumb: item }
+      return { src: item.src, thumb: item.thumb || item.src }
+    })
+  }
+
+  return heroYoutubeIds().map((id) => ({
+    src: youtubeThumb(id),
+    thumb: youtubeThumb(id, 'mqdefault'),
+  }))
+}
+
+function heroFilmBlock() {
+  const id = youtubeIdFromUrl(config.showreelUrl)
+  const poster = id ? youtubeThumb(id) : (heroFrames()[0]?.src || '')
+  const reduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (!id || reduced) {
+    return `
+      <div class="hero__media" aria-hidden="true">
+        <div class="hero__poster" style="background-image:url('${poster}')"></div>
+      </div>`
+  }
+
+  const src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&iv_load_policy=3&disablekb=1`
+
+  return `
+    <div class="hero__media" aria-hidden="true">
+      <div class="hero__poster" style="background-image:url('${poster}')"></div>
+      <iframe
+        class="hero__video"
+        src="${src}"
+        title="Costa Frame showreel"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen
+        tabindex="-1"
+      ></iframe>
+    </div>`
+}
+
 function contactButtons(lang) {
   const items = [
     {
@@ -128,6 +199,74 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;')
 }
 
+function videoWatchUrl(url) {
+  if (!url) return ''
+  const id = youtubeIdFromUrl(url)
+  if (id) return `https://www.youtube.com/watch?v=${id}`
+  const ig = url.match(/instagram\.com\/(?:reel|p|tv)\/([\w-]+)/i)
+  if (ig) return `https://www.instagram.com/reel/${ig[1]}/`
+  if (/youtube\.com\/@/.test(url)) return url.split('?')[0]
+  return url.split('?')[0]
+}
+
+function renderProjectTypeTile(lang, item) {
+  const label = t(lang, item.labelKey)
+  const watch = videoWatchUrl(item.videoUrl?.trim())
+  const ytId = youtubeIdFromUrl(item.videoUrl?.trim() || '')
+  const format = item.format === 'landscape' ? 'landscape' : 'portrait'
+  const thumb =
+    item.image?.trim() ||
+    (ytId
+      ? youtubeThumb(ytId, format === 'landscape' ? 'maxresdefault' : 'hqdefault')
+      : '')
+  const play = watch ? '<span class="use-tile__play" aria-hidden="true"></span>' : ''
+  const media = thumb
+    ? `<span class="use-tile__media"><img src="${thumb}" alt="" loading="lazy" />${play}</span>`
+    : `<span class="use-tile__media">${play}</span>`
+  const inner = `${media}<span class="use-tile__label">${escapeHtml(label)}</span>`
+  const classes = `use-tile use-tile--${format}${watch ? ' is-linked' : ''}`
+
+  if (watch) {
+    return `
+      <a
+        class="${classes}"
+        href="${watch}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >${inner}</a>`
+  }
+
+  return `<div class="${classes}">${inner}</div>`
+}
+
+function projectTypesBlock(lang) {
+  const items = (config.projectTypes || []).filter(
+    (item) => item.videoUrl?.trim() || item.image?.trim(),
+  )
+  if (!items.length) return ''
+
+  const landscape = items.filter((item) => item.format === 'landscape')
+  const portrait = items.filter((item) => item.format !== 'landscape')
+
+  return `
+    <div class="use-grid reveal">
+      ${
+        landscape.length
+          ? `<div class="use-grid__row use-grid__row--landscape">${landscape
+              .map((item) => renderProjectTypeTile(lang, item))
+              .join('')}</div>`
+          : ''
+      }
+      ${
+        portrait.length
+          ? `<div class="use-grid__row use-grid__row--portrait">${portrait
+              .map((item) => renderProjectTypeTile(lang, item))
+              .join('')}</div>`
+          : ''
+      }
+    </div>`
+}
+
 function projectsBlock(lang) {
   const projects = config.youtubeProjects || []
   if (!projects.length) return ''
@@ -156,36 +295,38 @@ function projectsBlock(lang) {
         .join('')
 
       return `
-        <article class="yt-project reveal">
-          <div class="yt-project__head">
-            <div>
+        <article class="yt-project">
+          <div class="yt-project__layout">
+            <div class="yt-project__media">
+              <div class="carousel" data-carousel>
+                <button
+                  type="button"
+                  class="carousel__nav carousel__nav--prev"
+                  data-carousel-prev
+                  aria-label="${t(lang, 'projectPrev')}"
+                >‹</button>
+                <div class="carousel__track" data-carousel-track tabindex="0">
+                  ${slides}
+                </div>
+                <button
+                  type="button"
+                  class="carousel__nav carousel__nav--next"
+                  data-carousel-next
+                  aria-label="${t(lang, 'projectNext')}"
+                >›</button>
+              </div>
+            </div>
+            <div class="yt-project__info">
               <h3>${t(lang, projectTitleKey(project.key))}</h3>
               <p class="yt-project__handle">${escapeHtml(project.handle)}</p>
-              <p>${t(lang, projectDescKey(project.key))}</p>
+              <p class="yt-project__desc">${t(lang, projectDescKey(project.key))}</p>
+              <a
+                class="btn btn--ghost"
+                href="${project.url}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >${t(lang, 'projectOpen')}</a>
             </div>
-            <a
-              class="btn btn--ghost"
-              href="${project.url}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >${t(lang, 'projectOpen')}</a>
-          </div>
-          <div class="carousel" data-carousel>
-            <button
-              type="button"
-              class="carousel__nav carousel__nav--prev"
-              data-carousel-prev
-              aria-label="${t(lang, 'projectPrev')}"
-            >‹</button>
-            <div class="carousel__track" data-carousel-track tabindex="0">
-              ${slides}
-            </div>
-            <button
-              type="button"
-              class="carousel__nav carousel__nav--next"
-              data-carousel-next
-              aria-label="${t(lang, 'projectNext')}"
-            >›</button>
           </div>
         </article>`
     })
@@ -206,29 +347,35 @@ function render(lang) {
 
   const app = document.querySelector('#app')
   app.innerHTML = `
-    <div class="ambient" aria-hidden="true"></div>
-
-    <header class="site-header">
+    <header class="site-header" data-site-header>
       <a class="logo" href="#top" data-i18n="brand">${t(lang, 'brand')}</a>
       <nav class="nav" aria-label="Primary">
         <a href="#services" data-i18n="navServices">${t(lang, 'navServices')}</a>
-        <a href="#pricing" data-i18n="navPricing">${t(lang, 'navPricing')}</a>
-        <a href="#gear" data-i18n="navGear">${t(lang, 'navGear')}</a>
+        <a href="#projects" data-i18n="navExamples">${t(lang, 'navExamples')}</a>
         <a href="#showreel" data-i18n="navShowreel">${t(lang, 'navShowreel')}</a>
-        <a href="#projects" data-i18n="navProjects">${t(lang, 'navProjects')}</a>
+        <a href="#pricing" data-i18n="navPricing">${t(lang, 'navPricing')}</a>
+        <a href="${escapeHtml(config.aboutUrl || '/about.html')}" data-i18n="navAbout">${t(lang, 'navAbout')}</a>
         <a href="#contact" data-i18n="navContact">${t(lang, 'navContact')}</a>
       </nav>
-      <div class="lang" role="group" aria-label="Language">${langSwitcher(lang)}</div>
+      <div class="header__actions">
+        <div class="lang" role="group" aria-label="Language">${langSwitcher(lang)}</div>
+        <a class="btn btn--header" href="#contact" data-i18n="ctaContact">${t(lang, 'ctaContact')}</a>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero">
-        <p class="hero__brand reveal" data-i18n="brand">${t(lang, 'brand')}</p>
-        <h1 class="hero__title reveal" data-i18n="heroTitle">${t(lang, 'heroTitle')}</h1>
-        <p class="hero__lead reveal" data-i18n="heroLead">${t(lang, 'heroLead')}</p>
-        <div class="hero__cta reveal">
-          <a class="btn btn--primary" href="#contact" data-i18n="ctaContact">${t(lang, 'ctaContact')}</a>
-          <a class="btn btn--ghost" href="https://wa.me/${phoneDigits}" target="_blank" rel="noopener noreferrer" data-i18n="ctaWhatsApp">${t(lang, 'ctaWhatsApp')}</a>
+        ${heroFilmBlock()}
+        <div class="hero__veil" aria-hidden="true"></div>
+        <div class="hero__inner">
+          <p class="hero__brand reveal" data-i18n="brand">${t(lang, 'brand')}</p>
+          <h1 class="hero__title reveal" data-i18n="heroTitle">${t(lang, 'heroTitle')}</h1>
+          <p class="hero__lead reveal" data-i18n="heroLead">${t(lang, 'heroLead')}</p>
+          <div class="hero__cta reveal">
+            <a class="btn btn--primary" href="#contact" data-i18n="ctaContact">${t(lang, 'ctaContact')}</a>
+            <a class="btn btn--on-dark" href="#showreel" data-i18n="navShowreel">${t(lang, 'navShowreel')}</a>
+          </div>
+          <a class="hero__scroll" href="#services" aria-label="${t(lang, 'navServices')}">↓</a>
         </div>
       </section>
 
@@ -237,12 +384,12 @@ function render(lang) {
           <h2 class="reveal" data-i18n="servicesTitle">${t(lang, 'servicesTitle')}</h2>
           <p class="section__lead reveal" data-i18n="servicesLead">${t(lang, 'servicesLead')}</p>
         </div>
-        <div class="services">
-          <article class="service reveal">
+        <div class="services-board reveal">
+          <article class="service">
             <h3 data-i18n="cameraTitle">${t(lang, 'cameraTitle')}</h3>
             <p data-i18n="cameraText">${t(lang, 'cameraText')}</p>
           </article>
-          <article class="service reveal">
+          <article class="service">
             <h3 data-i18n="droneTitle">${t(lang, 'droneTitle')}</h3>
             <p data-i18n="droneText">${t(lang, 'droneText')}</p>
             <p class="license" data-i18n="licenseNote">${t(lang, 'licenseNote')}</p>
@@ -250,24 +397,34 @@ function render(lang) {
         </div>
       </section>
 
-      <section class="section section--soft" id="for-whom">
+      <section class="section section--soft" id="projects">
         <div class="section__head">
           <h2 class="reveal" data-i18n="forWhomTitle">${t(lang, 'forWhomTitle')}</h2>
           <p class="section__lead reveal" data-i18n="forWhomLead">${t(lang, 'forWhomLead')}</p>
         </div>
-        <ul class="uses reveal">
-          <li data-i18n="usePodcasts">${t(lang, 'usePodcasts')}</li>
-          <li data-i18n="useYoutube">${t(lang, 'useYoutube')}</li>
-          <li data-i18n="useTrainings">${t(lang, 'useTrainings')}</li>
-          <li data-i18n="useEvents">${t(lang, 'useEvents')}</li>
-          <li data-i18n="useBeauty">${t(lang, 'useBeauty')}</li>
-          <li data-i18n="useFamily">${t(lang, 'useFamily')}</li>
-          <li data-i18n="useSocial">${t(lang, 'useSocial')}</li>
-          <li data-i18n="useReels">${t(lang, 'useReels')}</li>
-        </ul>
+        <div class="projects-more">
+          ${projectTypesBlock(lang)}
+        </div>
+        <div class="projects-youtube reveal">
+          <div class="projects-youtube__head">
+            <h3 data-i18n="projectsYoutubeLabel">${t(lang, 'projectsYoutubeLabel')}</h3>
+            <p data-i18n="projectsLead">${t(lang, 'projectsLead')}</p>
+          </div>
+          <div class="yt-projects">
+            ${projectsBlock(lang)}
+          </div>
+        </div>
       </section>
 
-      <section class="section" id="pricing">
+      <section class="section" id="showreel">
+        <div class="section__head">
+          <h2 class="reveal" data-i18n="showreelTitle">${t(lang, 'showreelTitle')}</h2>
+          <p class="section__lead reveal" data-i18n="showreelLead">${t(lang, 'showreelLead')}</p>
+        </div>
+        ${showreelBlock(lang)}
+      </section>
+
+      <section class="section section--soft" id="pricing">
         <div class="section__head">
           <h2 class="reveal" data-i18n="pricingTitle">${t(lang, 'pricingTitle')}</h2>
           <p class="section__lead reveal" data-i18n="pricingLead">${t(lang, 'pricingLead')}</p>
@@ -303,9 +460,18 @@ function render(lang) {
           </div>
         </div>
         <p class="pricing-note reveal" data-i18n="pricingNote">${t(lang, 'pricingNote')}</p>
+        <div class="pricing-quote reveal">
+          <p data-i18n="pricingQuote">${t(lang, 'pricingQuote')}</p>
+          <a
+            class="btn btn--primary"
+            href="${config.quoteFormUrl?.trim() || '#contact'}"
+            ${config.quoteFormUrl?.trim() ? 'target="_blank" rel="noopener noreferrer"' : ''}
+            data-i18n="pricingQuoteCta"
+          >${t(lang, 'pricingQuoteCta')}</a>
+        </div>
       </section>
 
-      <section class="section section--soft" id="gear">
+      <section class="section" id="gear">
         <div class="section__head">
           <h2 class="reveal" data-i18n="gearTitle">${t(lang, 'gearTitle')}</h2>
           <p class="section__lead reveal" data-i18n="gearLead">${t(lang, 'gearLead')}</p>
@@ -315,29 +481,12 @@ function render(lang) {
           <li data-i18n="gearCamera2">${t(lang, 'gearCamera2')}</li>
           <li data-i18n="gearLenses">${t(lang, 'gearLenses')}</li>
           <li data-i18n="gearGimbal">${t(lang, 'gearGimbal')}</li>
+          <li data-i18n="gearTripod">${t(lang, 'gearTripod')}</li>
           <li data-i18n="gearDrone">${t(lang, 'gearDrone')}</li>
-          <li data-i18n="gearShuttles">${t(lang, 'gearShuttles')}</li>
+          <li data-i18n="gearMonitor">${t(lang, 'gearMonitor')}</li>
           <li data-i18n="gearLav">${t(lang, 'gearLav')}</li>
           <li data-i18n="gearShotgun">${t(lang, 'gearShotgun')}</li>
         </ul>
-      </section>
-
-      <section class="section" id="showreel">
-        <div class="section__head">
-          <h2 class="reveal" data-i18n="showreelTitle">${t(lang, 'showreelTitle')}</h2>
-          <p class="section__lead reveal" data-i18n="showreelLead">${t(lang, 'showreelLead')}</p>
-        </div>
-        ${showreelBlock(lang)}
-      </section>
-
-      <section class="section section--soft" id="projects">
-        <div class="section__head">
-          <h2 class="reveal" data-i18n="projectsTitle">${t(lang, 'projectsTitle')}</h2>
-          <p class="section__lead reveal" data-i18n="projectsLead">${t(lang, 'projectsLead')}</p>
-        </div>
-        <div class="yt-projects">
-          ${projectsBlock(lang)}
-        </div>
       </section>
 
       <section class="section section--contact" id="contact">
@@ -345,7 +494,26 @@ function render(lang) {
           <h2 class="reveal" data-i18n="contactTitle">${t(lang, 'contactTitle')}</h2>
           <p class="section__lead reveal" data-i18n="contactLead">${t(lang, 'contactLead')}</p>
         </div>
-        <div class="contact-actions reveal">${contactButtons(lang)}</div>
+        <div class="about-contact reveal">
+          <figure class="about-contact__photo">
+            <img src="${config.photo}" alt="${escapeHtml(config.name)}" width="640" height="640" loading="lazy" />
+          </figure>
+          <div class="about-contact__body">
+            <h3 data-i18n="aboutTitle">${t(lang, 'aboutTitle')}</h3>
+            <p class="about-bio">
+              <span data-i18n="aboutText">${t(lang, 'aboutText')}</span>
+              ${' '}
+              <span data-i18n="aboutMore">${t(lang, 'aboutMore')}</span>
+              ${' '}
+              ${
+                config.aboutUrl
+                  ? `<a class="about-link" href="${escapeHtml(config.aboutUrl)}" data-i18n="aboutLinkLabel">${t(lang, 'aboutLinkLabel')}</a>.`
+                  : `<span class="about-link about-link--soon" data-i18n="aboutLinkLabel">${t(lang, 'aboutLinkLabel')}</span>.`
+              }
+            </p>
+            <div class="contact-actions">${contactButtons(lang)}</div>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -357,7 +525,21 @@ function render(lang) {
 
   bindLangButtons()
   bindCarousels()
+  bindHeaderScroll()
   observeReveals()
+}
+
+let headerScrollBound = false
+
+function bindHeaderScroll() {
+  const update = () => {
+    const header = document.querySelector('[data-site-header]')
+    if (header) header.classList.toggle('is-solid', window.scrollY > 40)
+  }
+  update()
+  if (headerScrollBound) return
+  headerScrollBound = true
+  window.addEventListener('scroll', update, { passive: true })
 }
 
 function bindLangButtons() {
@@ -378,12 +560,12 @@ function bindCarousels() {
     const next = carousel.querySelector('[data-carousel-next]')
     if (!track || !prev || !next) return
 
-    const step = () => {
-      const slide = track.querySelector('.carousel__slide')
-      if (!slide) return 240
-      const styles = getComputedStyle(track)
-      const gap = parseFloat(styles.columnGap || styles.gap || '12') || 12
-      return slide.getBoundingClientRect().width + gap
+    const step = () => track.clientWidth
+
+    const syncNav = () => {
+      const maxScroll = track.scrollWidth - track.clientWidth
+      prev.disabled = track.scrollLeft <= 1
+      next.disabled = track.scrollLeft >= maxScroll - 1
     }
 
     prev.addEventListener('click', () => {
@@ -392,6 +574,9 @@ function bindCarousels() {
     next.addEventListener('click', () => {
       track.scrollBy({ left: step(), behavior: 'smooth' })
     })
+    track.addEventListener('scroll', syncNav, { passive: true })
+    window.addEventListener('resize', syncNav, { passive: true })
+    syncNav()
   })
 }
 
