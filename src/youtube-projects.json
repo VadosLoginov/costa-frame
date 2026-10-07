@@ -1,0 +1,52 @@
+[
+  {
+    "key": "yoga",
+    "handle": "@SilentYogaFlow",
+    "url": "https://www.youtube.com/@SilentYogaFlow",
+    "channelId": "UCkbsAthGwDiFgpn5MgY-7sw",
+    "maxVideos": 6,
+    "videos": [
+      {
+        "id": "kJXh6ZhQiQQ",
+        "title": "20 Min Ocean View Yoga Flow | Spine Mobility & Heart Opening (No Talking)"
+      },
+      {
+        "id": "muhNYr5uaYA",
+        "title": "20 Min Silent Yoga Flow for Balance & Strength | Sunset Benidorm Spain"
+      }
+    ]
+  },
+  {
+    "key": "asmr",
+    "handle": "@BEHIND_THE_SCENES_ASMR",
+    "url": "https://www.youtube.com/@BEHIND_THE_SCENES_ASMR",
+    "channelId": "UCQvSIhNeB4WN0yRhUlU0LxA",
+    "maxVideos": 6,
+    "videos": [
+      {
+        "id": "ZBokhCc_2bs",
+        "title": "VIBRANT BENIDORM [NEW 2026] Downtown Walking Tour | 4K"
+      },
+      {
+        "id": "XsHFmjgV-kA",
+        "title": "SPAIN WALKING TOUR: Benidorm Streets near Levante Beach | 4K"
+      },
+      {
+        "id": "0bHUDOMbu_Q",
+        "title": "BENIDORM'S WILD COAST: Punta Conejera to Levante Beach | 4K"
+      },
+      {
+        "id": "FURvbXiFg8U",
+        "title": "ALTEA PORT TO THE LAKE [NEW 2026] Epic Coastal Walk & Drone Views"
+      },
+      {
+        "id": "VY7760s9wCQ",
+        "title": "ALBIR TO ALTEA PORT [NEW 2026] Coastal Walk & Drone Views"
+      },
+      {
+        "id": "9c0o7uWQwTo",
+        "title": "Relaxing Eucalyptus Park & Beach Walk | Platja El Torres 4K ASMR"
+      }
+    ]
+  }
+]

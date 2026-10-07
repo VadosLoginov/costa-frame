@@ -112,6 +112,86 @@ function showreelBlock(lang) {
     </div>`
 }
 
+function projectTitleKey(key) {
+  return key === 'yoga' ? 'projectYogaTitle' : 'projectAsmrTitle'
+}
+
+function projectDescKey(key) {
+  return key === 'yoga' ? 'projectYogaDesc' : 'projectAsmrDesc'
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
+function projectsBlock(lang) {
+  const projects = config.youtubeProjects || []
+  if (!projects.length) return ''
+
+  return projects
+    .map((project) => {
+      const slides = (project.videos || [])
+        .map(
+          (video) => `
+          <a
+            class="carousel__slide"
+            href="https://www.youtube.com/watch?v=${video.id}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://i.ytimg.com/vi/${video.id}/mqdefault.jpg"
+              alt="${escapeHtml(video.title)}"
+              width="320"
+              height="180"
+              loading="lazy"
+            />
+            <span class="carousel__caption">${escapeHtml(video.title)}</span>
+          </a>`,
+        )
+        .join('')
+
+      return `
+        <article class="yt-project reveal">
+          <div class="yt-project__head">
+            <div>
+              <h3>${t(lang, projectTitleKey(project.key))}</h3>
+              <p class="yt-project__handle">${escapeHtml(project.handle)}</p>
+              <p>${t(lang, projectDescKey(project.key))}</p>
+            </div>
+            <a
+              class="btn btn--ghost"
+              href="${project.url}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >${t(lang, 'projectOpen')}</a>
+          </div>
+          <div class="carousel" data-carousel>
+            <button
+              type="button"
+              class="carousel__nav carousel__nav--prev"
+              data-carousel-prev
+              aria-label="${t(lang, 'projectPrev')}"
+            >‹</button>
+            <div class="carousel__track" data-carousel-track tabindex="0">
+              ${slides}
+            </div>
+            <button
+              type="button"
+              class="carousel__nav carousel__nav--next"
+              data-carousel-next
+              aria-label="${t(lang, 'projectNext')}"
+            >›</button>
+          </div>
+        </article>`
+    })
+    .join('')
+}
+
 function render(lang) {
   document.documentElement.lang = lang
   document.title = t(lang, 'metaTitle')
@@ -135,6 +215,7 @@ function render(lang) {
         <a href="#pricing" data-i18n="navPricing">${t(lang, 'navPricing')}</a>
         <a href="#gear" data-i18n="navGear">${t(lang, 'navGear')}</a>
         <a href="#showreel" data-i18n="navShowreel">${t(lang, 'navShowreel')}</a>
+        <a href="#projects" data-i18n="navProjects">${t(lang, 'navProjects')}</a>
         <a href="#contact" data-i18n="navContact">${t(lang, 'navContact')}</a>
       </nav>
       <div class="lang" role="group" aria-label="Language">${langSwitcher(lang)}</div>
@@ -249,6 +330,16 @@ function render(lang) {
         ${showreelBlock(lang)}
       </section>
 
+      <section class="section section--soft" id="projects">
+        <div class="section__head">
+          <h2 class="reveal" data-i18n="projectsTitle">${t(lang, 'projectsTitle')}</h2>
+          <p class="section__lead reveal" data-i18n="projectsLead">${t(lang, 'projectsLead')}</p>
+        </div>
+        <div class="yt-projects">
+          ${projectsBlock(lang)}
+        </div>
+      </section>
+
       <section class="section section--contact" id="contact">
         <div class="section__head">
           <h2 class="reveal" data-i18n="contactTitle">${t(lang, 'contactTitle')}</h2>
@@ -265,6 +356,7 @@ function render(lang) {
   `
 
   bindLangButtons()
+  bindCarousels()
   observeReveals()
 }
 
@@ -275,6 +367,30 @@ function bindLangButtons() {
       setLocale(next)
       render(next)
       window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' })
+    })
+  })
+}
+
+function bindCarousels() {
+  document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+    const track = carousel.querySelector('[data-carousel-track]')
+    const prev = carousel.querySelector('[data-carousel-prev]')
+    const next = carousel.querySelector('[data-carousel-next]')
+    if (!track || !prev || !next) return
+
+    const step = () => {
+      const slide = track.querySelector('.carousel__slide')
+      if (!slide) return 240
+      const styles = getComputedStyle(track)
+      const gap = parseFloat(styles.columnGap || styles.gap || '12') || 12
+      return slide.getBoundingClientRect().width + gap
+    }
+
+    prev.addEventListener('click', () => {
+      track.scrollBy({ left: -step(), behavior: 'smooth' })
+    })
+    next.addEventListener('click', () => {
+      track.scrollBy({ left: step(), behavior: 'smooth' })
     })
   })
 }

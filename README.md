@@ -24,6 +24,20 @@ Open [`src/config.js`](src/config.js):
 - `telegram`, `instagram` — paste `@username` or full URL; buttons appear when filled
 - `showreelUrl` — YouTube/Vimeo watch or embed URL
 
+## YouTube carousel auto-update
+
+List of videos: [`src/youtube-projects.json`](src/youtube-projects.json).
+
+Refresh manually:
+
+```bash
+npm run update:youtube
+```
+
+Weekly auto-update: GitHub Action [`.github/workflows/update-youtube.yml`](.github/workflows/update-youtube.yml) runs every Monday and commits changes. If the repo is connected to Cloudflare Pages, the site redeploys after the push.
+
+You can also run it by hand: GitHub → **Actions** → **Update YouTube carousels** → **Run workflow**.
+
 ## Deploy on Cloudflare Pages (free)
 
 1. Create a GitHub repository and push this project.

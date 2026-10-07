@@ -1,7 +1,9 @@
+import youtubeProjects from './youtube-projects.json'
+
 /**
  * Costa Frame — contacts & media.
- * Fill telegram, instagram, showreelUrl when ready.
- * Telegram/Instagram buttons appear only when non-empty.
+ * Fill telegram when ready. Empty optional fields hide their buttons.
+ * YouTube carousel list: src/youtube-projects.json (npm run update:youtube).
  */
 export const config = {
   name: 'Vadim Loginov',
@@ -9,6 +11,7 @@ export const config = {
   phone: '+34624374845',
   email: 'v.loginov.sp@gmail.com',
   telegram: '', // e.g. @username or https://t.me/username
-  instagram: '', // e.g. @username or https://instagram.com/username
-  showreelUrl: '', // YouTube or Vimeo embed URL, e.g. https://www.youtube.com/embed/VIDEO_ID
+  instagram: '@vados_sp',
+  showreelUrl: 'https://youtu.be/qtrKLQTNIeY',
+  youtubeProjects,
 }
