@@ -58,9 +58,9 @@ Refresh manually:
 npm run update:youtube
 ```
 
-Weekly auto-update: GitHub Action [`.github/workflows/update-youtube.yml`](.github/workflows/update-youtube.yml) runs every Monday and commits changes. If the repo is connected to Cloudflare Pages, the site redeploys after the push.
+Weekly auto-update: GitHub Action [`.github/workflows/update-youtube.yml`](.github/workflows/update-youtube.yml) runs every Monday, refreshes `src/youtube-projects.json`, and pushes the commit. With the repo connected to Vercel, the site redeploys automatically.
 
-You can also run it by hand: GitHub → **Actions** → **Update YouTube carousels** → **Run workflow**.
+Manual run: GitHub → **Actions** → **Update YouTube carousels** → **Run workflow**.
 
 ## Deploy on Cloudflare Pages (free)
 
