@@ -60,9 +60,9 @@ export const config = {
     },
     { labelKey: 'useTrainings', videoUrl: '', image: '', format: 'portrait' },
     {
-      labelKey: 'useEvents',
-      videoUrl: 'https://youtu.be/o98m4XKTRqI',
-      image: '/examples/events.jpg',
+      labelKey: 'useAds',
+      videoUrl: 'https://youtu.be/MIvGcAtfz-A',
+      image: '',
       format: 'landscape',
     },
     {
