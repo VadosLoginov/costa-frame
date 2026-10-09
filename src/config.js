@@ -19,6 +19,8 @@ export const config = {
   /** Google Form for project quote — paste share URL when ready */
   quoteFormUrl:
     'https://docs.google.com/forms/d/1Y12Yl7vhlQ-HNEIiTH9Sl7sR5WMMRQQczTDa5RG5dJg/viewform',
+  /** Show hourly rate cards in the pricing section */
+  showPricingRates: false,
   stockLinks: [
     {
       label: 'Shutterstock',

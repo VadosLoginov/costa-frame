@@ -429,7 +429,9 @@ function render(lang) {
           <h2 class="reveal" data-i18n="pricingTitle">${t(lang, 'pricingTitle')}</h2>
           <p class="section__lead reveal" data-i18n="pricingLead">${t(lang, 'pricingLead')}</p>
         </div>
-        <div class="prices">
+        ${
+          config.showPricingRates
+            ? `<div class="prices">
           <div class="price reveal">
             <div class="price__row">
               <h3 data-i18n="priceCameraEdit">${t(lang, 'priceCameraEdit')}</h3>
@@ -458,8 +460,9 @@ function render(lang) {
             </div>
             <p class="price__meta" data-i18n="priceDroneRawMeta">${t(lang, 'priceDroneRawMeta')}</p>
           </div>
-        </div>
-        <p class="pricing-note reveal" data-i18n="pricingNote">${t(lang, 'pricingNote')}</p>
+        </div>`
+            : ''
+        }
         <div class="pricing-quote reveal">
           <p data-i18n="pricingQuote">${t(lang, 'pricingQuote')}</p>
           <a
@@ -469,6 +472,7 @@ function render(lang) {
             data-i18n="pricingQuoteCta"
           >${t(lang, 'pricingQuoteCta')}</a>
         </div>
+        <p class="pricing-note reveal" data-i18n="pricingNote">${t(lang, 'pricingNote')}</p>
       </section>
 
       <section class="section" id="gear">
