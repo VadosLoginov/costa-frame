@@ -2,7 +2,7 @@ import './style.css'
 import { config } from './config.js'
 import { detectLocale, locales, localeLabels, setLocale, t } from './i18n.js'
 
-const phoneDigits = config.phone.replace(/\D/g, '')
+const phoneDigits = (config.whatsapp || config.phone || '').replace(/\D/g, '')
 
 function telegramHref(value) {
   if (!value) return ''
@@ -113,7 +113,7 @@ function contactButtons(lang) {
       href: `https://wa.me/${phoneDigits}`,
       label: t(lang, 'contactWhatsApp'),
       className: 'btn btn--primary',
-      show: Boolean(config.phone),
+      show: Boolean(phoneDigits),
       external: true,
     },
     {

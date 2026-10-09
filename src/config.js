@@ -10,9 +10,10 @@ export const config = {
   brand: 'Costa Frame',
   photo: '/vadim.jpg',
   aboutUrl: '/about.html',
-  phone: '+34624374845',
+  phone: '', // empty = hide Call button
+  whatsapp: '+380675384352',
   email: 'v.loginov.sp@gmail.com',
-  telegram: '', // e.g. @username or https://t.me/username
+  telegram: '@vados_ai',
   instagram: '@vados_sp',
   collaboratorInstagram: '@_lena_see',
   showreelUrl: 'https://youtu.be/qtrKLQTNIeY',
