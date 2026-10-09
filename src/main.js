@@ -214,14 +214,17 @@ function renderProjectTypeTile(lang, item) {
   const watch = videoWatchUrl(item.videoUrl?.trim())
   const ytId = youtubeIdFromUrl(item.videoUrl?.trim() || '')
   const format = item.format === 'landscape' ? 'landscape' : 'portrait'
+  const thumbQuality = format === 'landscape' ? 'mqdefault' : 'hqdefault'
   const thumb =
-    item.image?.trim() ||
-    (ytId
-      ? youtubeThumb(ytId, format === 'landscape' ? 'maxresdefault' : 'hqdefault')
-      : '')
+    item.image?.trim() || (ytId ? youtubeThumb(ytId, thumbQuality) : '')
+  const thumbFallback = ytId ? youtubeThumb(ytId, 'hqdefault') : ''
   const play = watch ? '<span class="use-tile__play" aria-hidden="true"></span>' : ''
+  const imgFallback =
+    ytId && !item.image?.trim()
+      ? ` onerror="this.onerror=null;this.src='${thumbFallback}'"`
+      : ''
   const media = thumb
-    ? `<span class="use-tile__media"><img src="${thumb}" alt="" loading="lazy" />${play}</span>`
+    ? `<span class="use-tile__media"><img src="${thumb}" alt="" loading="lazy"${imgFallback} />${play}</span>`
     : `<span class="use-tile__media">${play}</span>`
   const inner = `${media}<span class="use-tile__label">${escapeHtml(label)}</span>`
   const classes = `use-tile use-tile--${format}${watch ? ' is-linked' : ''}`
