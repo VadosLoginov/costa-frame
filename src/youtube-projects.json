@@ -7,6 +7,10 @@
     "maxVideos": 6,
     "videos": [
       {
+        "id": "Jzns4hHlS2E",
+        "title": "20 Min Hip Mobility & Deep Stretch | Poniente Beach Palms & Mountain View"
+      },
+      {
         "id": "AkgkmvAgGx0",
         "title": "20 Min Silent Yoga Flow for Balance & Core Strength | Mountain View"
       },
@@ -28,6 +32,10 @@
     "maxVideos": 6,
     "videos": [
       {
+        "id": "I1sr_WejZxs",
+        "title": "BENIDORM OLD TOWN TO MIRADOR [NEW 2026] 4K Walking Tour"
+      },
+      {
         "id": "ZBokhCc_2bs",
         "title": "VIBRANT BENIDORM [NEW 2026] Downtown Walking Tour | 4K"
       },
@@ -46,10 +54,6 @@
       {
         "id": "VY7760s9wCQ",
         "title": "ALBIR TO ALTEA PORT [NEW 2026] Coastal Walk & Drone Views"
-      },
-      {
-        "id": "9c0o7uWQwTo",
-        "title": "Relaxing Eucalyptus Park & Beach Walk | Platja El Torres 4K ASMR"
       }
     ]
   }
